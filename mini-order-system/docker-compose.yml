@@ -12,6 +12,21 @@ services:
       - "5433:5432"
     volumes:
       - product_db_data:/var/lib/postgresql/data
+      - ./product-service/init:/docker-entrypoint-initdb.d
+
+  product-service:
+    build: ./product-service
+    ports:
+      - "3001:3001"
+    environment:
+      DB_HOST: product-db
+      DB_PORT: 5432
+      DB_USER: product_user
+      DB_PASSWORD: product_pass
+      DB_NAME: product_db
+      PORT: 3001
+    depends_on:
+      - product-db
 
   # ---------- Order Service's own database ----------
   order-db:
