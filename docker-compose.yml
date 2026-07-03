@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  # ---------- Product Service's own database ----------
+  product-db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: product_user
+      POSTGRES_PASSWORD: product_pass
+      POSTGRES_DB: product_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - product_db_data:/var/lib/postgresql/data
+
+  # ---------- Order Service's own database ----------
+  order-db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: order_user
+      POSTGRES_PASSWORD: order_pass
+      POSTGRES_DB: order_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - order_db_data:/var/lib/postgresql/data
+
+  # ---------- Message broker for async events ----------
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  # ---------- Services will be added below as we build each one ----------
+  # product-service:
+  # order-service:
+  # notification-service:
+  # api-gateway:
+
+volumes:
+  product_db_data:
+  order_db_data:
