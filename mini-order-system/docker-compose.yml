@@ -39,6 +39,23 @@ services:
       - "5434:5432"
     volumes:
       - order_db_data:/var/lib/postgresql/data
+      - ./order-service/init:/docker-entrypoint-initdb.d
+
+  order-service:
+    build: ./order-service
+    ports:
+      - "3002:3002"
+    environment:
+      DB_HOST: order-db
+      DB_PORT: 5432
+      DB_USER: order_user
+      DB_PASSWORD: order_pass
+      DB_NAME: order_db
+      PORT: 3002
+      PRODUCT_SERVICE_URL: http://product-service:3001   # ← the internal address
+    depends_on:
+      - order-db
+      - product-service
 
   # ---------- Message broker for async events ----------
   rabbitmq:
