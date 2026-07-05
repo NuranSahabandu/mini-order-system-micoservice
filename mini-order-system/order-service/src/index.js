@@ -1,6 +1,7 @@
 import express from "express";
 import axios from "axios";
 import pool from "./db.js";
+import { connectRabbitMQ, publishOrderCreated } from "./rabbitmq.js";
 
 const app = express();
 app.use(express.json());
@@ -52,7 +53,12 @@ app.post("/orders", async (req, res) => {
     [product.id, product.name, quantity, totalPrice]
   );
 
-  res.status(201).json(result.rows[0]);
+  const order = result.rows[0];
+
+  // Fire the event AFTER the order is safely saved — never publish before the DB write succeeds
+  publishOrderCreated(order);
+
+  res.status(201).json(order);
 });
 
 app.get("/orders", async (req, res) => {
@@ -61,6 +67,12 @@ app.get("/orders", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3002;
-app.listen(PORT, () => {
-  console.log(`Order service running on port ${PORT}`);
+
+connectRabbitMQ().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Order service running on port ${PORT}`);
+  });
+}).catch(err => {
+  console.error("Failed to connect to RabbitMQ:", err);
+  process.exit(1);
 });
