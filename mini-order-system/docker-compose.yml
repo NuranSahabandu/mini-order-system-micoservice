@@ -55,16 +55,20 @@ services:
       PRODUCT_SERVICE_URL: http://product-service:3001   # ← the internal address
       RABBITMQ_URL: amqp://rabbitmq:5672
     depends_on:
-      - order-db
-      - product-service
-      - rabbitmq
+      order-db:
+        condition: service_started
+      product-service:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
 
   notification-service:
     build: ./notification-service
     environment:
       RABBITMQ_URL: amqp://rabbitmq:5672
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
 
   # ---------- Message broker for async events ----------
   rabbitmq:
@@ -72,6 +76,11 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   # ---------- Services will be added below as we build each one ----------
   # product-service:
