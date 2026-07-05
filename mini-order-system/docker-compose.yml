@@ -53,9 +53,18 @@ services:
       DB_NAME: order_db
       PORT: 3002
       PRODUCT_SERVICE_URL: http://product-service:3001   # ← the internal address
+      RABBITMQ_URL: amqp://rabbitmq:5672
     depends_on:
       - order-db
       - product-service
+      - rabbitmq
+
+  notification-service:
+    build: ./notification-service
+    environment:
+      RABBITMQ_URL: amqp://rabbitmq:5672
+    depends_on:
+      - rabbitmq
 
   # ---------- Message broker for async events ----------
   rabbitmq:
