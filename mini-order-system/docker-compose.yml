@@ -82,6 +82,17 @@ services:
       timeout: 5s
       retries: 10
 
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      PRODUCT_SERVICE_URL: http://product-service:3001
+      ORDER_SERVICE_URL: http://order-service:3002
+    depends_on:
+      - product-service
+      - order-service
+
   # ---------- Services will be added below as we build each one ----------
   # product-service:
   # order-service:
