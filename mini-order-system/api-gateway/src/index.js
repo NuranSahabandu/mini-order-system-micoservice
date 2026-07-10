@@ -1,5 +1,5 @@
-import express from 'express';
-import axios from 'axios';
+import express from "express";
+import axios from "axios";
 
 const app = express();
 app.use(express.json());
@@ -13,8 +13,6 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok", service: "api-gateway" });
 });
 
-// A single reusable proxy function — takes the incoming request,
-// the target base URL, and forwards the request there.
 async function proxyRequest(req, res, targetBaseUrl) {
   const targetUrl = `${targetBaseUrl}${req.originalUrl}`;
 
@@ -26,7 +24,7 @@ async function proxyRequest(req, res, targetBaseUrl) {
       headers: {
         "Content-Type": "application/json",
       },
-      validateStatus: () => true, // don't let axios throw on 4xx/5xx — we want to relay them as-is
+      validateStatus: () => true,
     });
 
     res.status(response.status).json(response.data);
@@ -36,13 +34,9 @@ async function proxyRequest(req, res, targetBaseUrl) {
   }
 }
 
-// Every request starting with /products goes to Product Service
-app.all("/products", (req, res) => proxyRequest(req, res, PRODUCT_SERVICE_URL));
-app.all("/products/*", (req, res) => proxyRequest(req, res, PRODUCT_SERVICE_URL));
-
-// Every request starting with /orders goes to Order Service
-app.all("/orders", (req, res) => proxyRequest(req, res, ORDER_SERVICE_URL));
-app.all("/orders/*", (req, res) => proxyRequest(req, res, ORDER_SERVICE_URL));
+// app.use matches this path AND everything under it — e.g. /products, /products/1, /products/1/reviews
+app.use("/products", (req, res) => proxyRequest(req, res, PRODUCT_SERVICE_URL));
+app.use("/orders", (req, res) => proxyRequest(req, res, ORDER_SERVICE_URL));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

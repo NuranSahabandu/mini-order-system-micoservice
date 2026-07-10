@@ -16,8 +16,8 @@ services:
 
   product-service:
     build: ./product-service
-    ports:
-      - "3001:3001"
+    # ports:
+    #   - "3001:3001"
     environment:
       DB_HOST: product-db
       DB_PORT: 5432
@@ -43,8 +43,8 @@ services:
 
   order-service:
     build: ./order-service
-    ports:
-      - "3002:3002"
+    # ports:
+    #   - "3002:3002"
     environment:
       DB_HOST: order-db
       DB_PORT: 5432
